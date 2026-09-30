@@ -26,10 +26,39 @@ pipeline {
             }
         }
 
-        stage('Unit Testing') {
+        stage('Smoke Tests') {
             steps {
-                echo 'Executing Automated Unit Tests...'
-                sh 'mvn test'
+                echo '========================================='
+                echo ' RUNNING SMOKE TESTS (HEALTH & LATENCY)  '
+                echo '========================================='
+                sh 'mvn test -Dtest=SmokeTest'
+            }
+        }
+
+        stage('Unit Tests') {
+            steps {
+                echo '========================================='
+                echo '       RUNNING CORE UNIT TESTS           '
+                echo '========================================='
+                sh 'mvn test -Dtest=HelloWorldTest'
+            }
+        }
+
+        stage('Integration & CLI Tests') {
+            steps {
+                echo '========================================='
+                echo ' RUNNING INTEGRATION & CLI STREAM TESTS  '
+                echo '========================================='
+                sh 'mvn test -Dtest=IntegrationTest'
+            }
+        }
+
+        stage('Regression & Boundary Tests') {
+            steps {
+                echo '========================================='
+                echo ' RUNNING PARAMETERIZED REGRESSION TESTS  '
+                echo '========================================='
+                sh 'mvn test -Dtest=RegressionTest'
             }
             post {
                 always {
@@ -41,14 +70,17 @@ pipeline {
         stage('Package & Build Artifact') {
             steps {
                 echo 'Packaging application into executable JAR...'
-                sh 'mvn clean package'
+                sh 'mvn package -DskipTests'
             }
         }
 
-        stage('Execute & Verify') {
+        stage('Runtime Verification') {
             steps {
-                echo 'Verifying application runtime output...'
+                echo 'Verifying application runtime execution and CLI smoke check...'
                 sh 'java -jar target/jenkins-lab-1.0-SNAPSHOT.jar'
+                sh 'java -jar target/jenkins-lab-1.0-SNAPSHOT.jar --smoke'
+                sh 'java -jar target/jenkins-lab-1.0-SNAPSHOT.jar --version'
+                sh 'java -jar target/jenkins-lab-1.0-SNAPSHOT.jar --greet "Jenkins CI"'
             }
         }
 
@@ -63,12 +95,13 @@ pipeline {
     post {
         success {
             echo '==================================================='
-            echo '  JENKINS CI PIPELINE COMPLETED SUCCESSFULLY (PASSED) '
+            echo '  ALL TEST SUITES (SMOKE, UNIT, INT, REG) PASSED!  '
+            echo '  JENKINS CI PIPELINE COMPLETED SUCCESSFULLY       '
             echo '==================================================='
         }
         failure {
             echo '==================================================='
-            echo '        JENKINS CI PIPELINE BUILD FAILED            '
+            echo '        JENKINS CI PIPELINE BUILD/TEST FAILED       '
             echo '==================================================='
         }
     }

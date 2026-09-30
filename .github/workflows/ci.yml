@@ -25,14 +25,27 @@ jobs:
     - name: Compile Application
       run: mvn compile
 
+    - name: Run Smoke Tests
+      run: mvn test -Dtest=SmokeTest
+
     - name: Run Unit Tests
-      run: mvn test
+      run: mvn test -Dtest=HelloWorldTest
+
+    - name: Run Integration Tests
+      run: mvn test -Dtest=IntegrationTest
+
+    - name: Run Regression Tests
+      run: mvn test -Dtest=RegressionTest
 
     - name: Package Application JAR
       run: mvn clean package
 
-    - name: Execute Application Verification
-      run: java -jar target/jenkins-lab-1.0-SNAPSHOT.jar
+    - name: Execute Application Runtime Verification
+      run: |
+        java -jar target/jenkins-lab-1.0-SNAPSHOT.jar
+        java -jar target/jenkins-lab-1.0-SNAPSHOT.jar --smoke
+        java -jar target/jenkins-lab-1.0-SNAPSHOT.jar --version
+        java -jar target/jenkins-lab-1.0-SNAPSHOT.jar --greet "GitHub Actions CI"
 
     - name: Upload Build Artifact
       uses: actions/upload-artifact@v4

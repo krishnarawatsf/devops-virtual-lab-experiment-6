@@ -2,6 +2,7 @@
 
 [![Java CI with Maven](https://github.com/krishnarawatsf/devops-virtual-lab-experiment-6/actions/workflows/ci.yml/badge.svg)](https://github.com/krishnarawatsf/devops-virtual-lab-experiment-6/actions/workflows/ci.yml)
 [![Build Status](https://img.shields.io/badge/Build-SUCCESS-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-24%20Passed-brightgreen.svg)]()
 [![Java](https://img.shields.io/badge/Java-11%2B-orange.svg)]()
 [![Maven](https://img.shields.io/badge/Maven-3.8%2B-blue.svg)]()
 [![Jenkins](https://img.shields.io/badge/Jenkins-2.4%2B-red.svg)]()
@@ -9,7 +10,7 @@
 ---
 
 ## 📌 Aim
-To implement **Continuous Integration (CI)** using **Jenkins** and **Apache Maven**, where source code is automatically pulled, compiled, tested, and packaged into an executable artifact whenever changes are pushed to a Git repository.
+To implement **Continuous Integration (CI)** using **Jenkins** and **Apache Maven**, where source code is automatically pulled, compiled, multi-tier tested (Smoke, Unit, Integration, Regression), and packaged into an executable artifact whenever changes are pushed to a Git repository.
 
 ---
 
@@ -18,9 +19,25 @@ A software development organization wants to eliminate manual compilation and re
 1. Detect repository change events.
 2. Clone the latest source code.
 3. Invoke Apache Maven to resolve dependencies and compile the code.
-4. Execute unit test suites.
+4. Execute multi-level automated test suites:
+   - **Smoke Tests**: Immediate sanity checks verifying runtime health and latency boundaries.
+   - **Unit Tests**: Isolating and testing individual business methods.
+   - **Integration Tests**: Validating CLI argument streams and stdout output.
+   - **Regression & Boundary Tests**: Parameterized datasets ensuring backwards compatibility.
 5. Generate an executable JAR file artifact.
 6. Report build status and execution outcomes immediately to the engineering team.
+
+---
+
+## 🧪 Testing Pyramid & Test Strategy
+
+| Test Layer | Test Class | Purpose | Execution Command |
+| :--- | :--- | :--- | :--- |
+| **🔥 Smoke Testing** | `SmokeTest.java` | Fast sanity check (<50ms) verifying JVM bootstrap, memory availability, and constant integrity | `mvn test -Dtest=SmokeTest` |
+| **🧩 Unit Testing** | `HelloWorldTest.java` | Isolated validation of greeting logic, fallback handlers, and success rate metric algorithms | `mvn test -Dtest=HelloWorldTest` |
+| **🔌 Integration Testing** | `IntegrationTest.java` | End-to-end CLI arguments capture (`--smoke`, `--version`, `--greet`, `--help`) via `System.out` streams | `mvn test -Dtest=IntegrationTest` |
+| **🔄 Regression Testing** | `RegressionTest.java` | JUnit 5 `@ParameterizedTest` and `@CsvSource` validating boundary edge cases, usernames, and metrics | `mvn test -Dtest=RegressionTest` |
+| **🚀 Full Test Suite** | All Tests (24 Tests) | Complete test suite execution prior to binary packaging | `mvn test` |
 
 ---
 
@@ -33,7 +50,7 @@ A software development organization wants to eliminate manual compilation and re
 | **CI/CD Automation Server**| Jenkins | Continuous Integration server orchestrating pipelines |
 | **Build Automation Tool** | Apache Maven | Project lifecycle management, compilation & packaging |
 | **Programming Language** | Java (OpenJDK 11/17) | Core application code runtime |
-| **Testing Framework** | JUnit 5 | Automated unit testing & regression verification |
+| **Testing Framework** | JUnit 5 (Jupiter & Params) | Automated multi-tier testing & regression verification |
 | **Target OS Environment** | Linux / Ubuntu / macOS | Host server execution environment |
 
 ---
@@ -43,7 +60,7 @@ A software development organization wants to eliminate manual compilation and re
 ```mermaid
 flowchart LR
     subgraph Developer["👨‍💻 Developer"]
-        A[Write Java Code] --> B[git commit & push]
+        A[Write Java Code & Tests] --> B[git commit & push]
     end
 
     subgraph GitHub["🐙 GitHub"]
@@ -53,15 +70,17 @@ flowchart LR
 
     subgraph Jenkins["⚙️ Jenkins CI Server"]
         D --> E[Checkout Source Code]
-        E --> F[Invoke Maven Targets]
-        F --> G[mvn compile]
-        G --> H[mvn test]
-        H --> I[mvn package]
-        I --> J[Archive JAR Artifact]
+        E --> F[mvn compile]
+        F --> G["🔥 Smoke Tests<br/>(Health & Latency)"]
+        G --> H["🧩 Unit Tests<br/>(Business Logic)"]
+        H --> I["🔌 Integration Tests<br/>(CLI & Streams)"]
+        I --> J["🔄 Regression Tests<br/>(Parameterized Bounds)"]
+        J --> K[mvn package]
+        K --> L[Archive JAR Artifact]
     end
 
     subgraph Status["📊 Output Status"]
-        J --> K["✅ BUILD SUCCESS<br/>(Artifact: jenkins-lab.jar)"]
+        L --> M["✅ BUILD SUCCESS<br/>(24 Tests Passed)"]
     end
 ```
 
@@ -73,13 +92,16 @@ flowchart LR
 jenkins-lab/
 ├── .github/
 │   └── workflows/
-│       └── ci.yml             # GitHub Actions CI workflow
+│       └── ci.yml             # GitHub Actions CI workflow (Smoke, Unit, Int, Reg)
 ├── src/
-│   └── HelloWorld.java        # Core Java Application Class
+│   └── HelloWorld.java        # Core Java Application Class with CLI & Health API
 ├── test/
-│   └── HelloWorldTest.java    # JUnit 5 Unit Tests
-├── Jenkinsfile                # Declarative Jenkins CI/CD Pipeline
-├── pom.xml                    # Maven Project Object Model Configuration
+│   ├── SmokeTest.java         # Smoke & Sanity Tests (Latency, Health, Memory)
+│   ├── HelloWorldTest.java    # Unit Tests (Core Logic, Metric Calculations)
+│   ├── IntegrationTest.java   # Integration Tests (CLI Arguments, Stream Capture)
+│   └── RegressionTest.java    # Parameterized Regression & Boundary Tests
+├── Jenkinsfile                # Declarative Jenkins CI/CD Pipeline (Multi-Stage)
+├── pom.xml                    # Maven POM Configuration (JUnit 5 + Surefire)
 ├── .gitignore                 # Git ignore rules for build artifacts
 └── README.md                  # Comprehensive Lab Documentation & Viva Voce
 ```
@@ -91,108 +113,376 @@ jenkins-lab/
 ### 1. `src/HelloWorld.java`
 ```java
 public class HelloWorld {
+
+    public static final String APP_NAME = "Jenkins Maven CI Application";
+    public static final String APP_VERSION = "1.0.0";
+    public static final String DEFAULT_MESSAGE = "Hello from Jenkins CI Pipeline!";
+
     public static void main(String[] args) {
-        System.out.println(getMessage());
+        if (args != null && args.length > 0) {
+            String command = args[0].trim();
+            switch (command) {
+                case "--smoke":
+                case "-s":
+                    System.out.println("SMOKE_TEST_OK: " + getHealthStatus());
+                    break;
+                case "--version":
+                case "-v":
+                    System.out.println(APP_NAME + " version " + APP_VERSION);
+                    break;
+                case "--greet":
+                    String target = (args.length > 1) ? args[1] : "DevOps Engineer";
+                    System.out.println(getCustomMessage(target));
+                    break;
+                case "--help":
+                case "-h":
+                    printHelp();
+                    break;
+                default:
+                    System.out.println(getCustomMessage(command));
+                    break;
+            }
+        } else {
+            System.out.println(getMessage());
+        }
     }
 
     public static String getMessage() {
-        return "Hello from Jenkins CI Pipeline!";
+        return DEFAULT_MESSAGE;
+    }
+
+    public static String getCustomMessage(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            return DEFAULT_MESSAGE;
+        }
+        return "Hello " + name.trim() + " from Jenkins CI Pipeline!";
+    }
+
+    public static String getHealthStatus() {
+        long freeMem = Runtime.getRuntime().freeMemory();
+        long maxMem = Runtime.getRuntime().maxMemory();
+        return "HEALTHY [FreeMemory: " + (freeMem / (1024 * 1024)) + "MB / MaxMemory: " + (maxMem / (1024 * 1024)) + "MB]";
+    }
+
+    public static boolean isHealthy() {
+        return Runtime.getRuntime().availableProcessors() > 0 && Runtime.getRuntime().freeMemory() > 0;
+    }
+
+    public static double calculateSuccessRate(int totalTests, int passedTests) {
+        if (totalTests <= 0) {
+            return 0.0;
+        }
+        if (passedTests < 0 || passedTests > totalTests) {
+            throw new IllegalArgumentException("Passed tests must be between 0 and totalTests");
+        }
+        return (double) passedTests / totalTests * 100.0;
+    }
+
+    public static String getEnvironmentInfo() {
+        return "Java " + System.getProperty("java.version") + " (" + System.getProperty("os.name") + ")";
+    }
+
+    private static void printHelp() {
+        System.out.println("Usage: java -jar jenkins-lab.jar [OPTIONS]");
+        System.out.println("Options:");
+        System.out.println("  --smoke, -s       Execute quick smoke health check");
+        System.out.println("  --version, -v     Display application version");
+        System.out.println("  --greet <name>    Print custom greeting message");
+        System.out.println("  --help, -h        Show this help manual");
     }
 }
 ```
 
-### 2. `test/HelloWorldTest.java`
+---
+
+### 2. `test/SmokeTest.java`
 ```java
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import java.time.Duration;
 
-public class HelloWorldTest {
+import static org.junit.jupiter.api.Assertions.*;
+
+@Tag("smoke")
+@DisplayName("Smoke Tests - Critical Path & Runtime Health Verification")
+public class SmokeTest {
 
     @Test
-    void testGetMessage() {
-        String expected = "Hello from Jenkins CI Pipeline!";
-        assertEquals(expected, HelloWorld.getMessage(), "Message should match the expected CI greeting.");
+    @DisplayName("Smoke 01: Application class loads and constants are non-null")
+    void testApplicationClassPresence() {
+        assertNotNull(HelloWorld.APP_NAME, "App name must be defined");
+        assertNotNull(HelloWorld.APP_VERSION, "App version must be defined");
+        assertNotNull(HelloWorld.DEFAULT_MESSAGE, "Default message must be defined");
+        assertTrue(HelloWorld.APP_VERSION.matches("\\d+\\.\\d+\\.\\d+"), "Version should follow semver");
     }
 
     @Test
-    void testMainMethod() {
-        HelloWorld.main(new String[]{});
-        assertNotNull(HelloWorld.getMessage());
+    @DisplayName("Smoke 02: JVM environment and runtime health check")
+    void testRuntimeHealthCheck() {
+        assertTrue(HelloWorld.isHealthy(), "Runtime health check should return true");
+        String healthStatus = HelloWorld.getHealthStatus();
+        assertNotNull(healthStatus);
+        assertTrue(healthStatus.startsWith("HEALTHY"), "Health status string should begin with HEALTHY");
+    }
+
+    @Test
+    @DisplayName("Smoke 03: Fast execution response time (Latency < 50ms)")
+    void testCoreResponseExecutionSpeed() {
+        assertTimeoutPreemptively(Duration.ofMillis(50), () -> {
+            String msg = HelloWorld.getMessage();
+            assertNotNull(msg);
+            assertEquals("Hello from Jenkins CI Pipeline!", msg);
+        }, "Smoke execution must complete within 50 milliseconds");
+    }
+
+    @Test
+    @DisplayName("Smoke 04: Environment metadata availability")
+    void testEnvironmentInfo() {
+        String env = HelloWorld.getEnvironmentInfo();
+        assertNotNull(env);
+        assertTrue(env.contains("Java"), "Environment info must include Java runtime version");
     }
 }
 ```
 
-### 3. `pom.xml`
-```xml
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+---
 
-    <groupId>com.devops</groupId>
-    <artifactId>jenkins-lab</artifactId>
-    <version>1.0-SNAPSHOT</version>
-    <packaging>jar</packaging>
+### 3. `test/IntegrationTest.java`
+```java
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
-    <name>jenkins-lab</name>
-    <description>Virtual Lab Experiment-6: Continuous Integration with Jenkins and Maven</description>
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 
-    <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-        <maven.compiler.release>11</maven.compiler.release>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <junit.version>5.10.2</junit.version>
-    </properties>
+import static org.junit.jupiter.api.Assertions.*;
 
-    <dependencies>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+@Tag("integration")
+@DisplayName("Integration Tests - CLI Flow & Subsystem Integration")
+public class IntegrationTest {
 
-    <build>
-        <sourceDirectory>src</sourceDirectory>
-        <testSourceDirectory>test</testSourceDirectory>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.13.0</version>
-                <configuration>
-                    <release>11</release>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.2.5</version>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.4.1</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>HelloWorld</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-</project>
+    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+    private final PrintStream originalOut = System.out;
+
+    @BeforeEach
+    void setUpStreams() {
+        System.setOut(new PrintStream(outContent));
+    }
+
+    @AfterEach
+    void restoreStreams() {
+        System.setOut(originalOut);
+    }
+
+    @Test
+    @DisplayName("CLI Integration: Test --smoke argument")
+    void testCliSmokeArgument() {
+        HelloWorld.main(new String[]{"--smoke"});
+        String output = outContent.toString().trim();
+        assertTrue(output.contains("SMOKE_TEST_OK"));
+        assertTrue(output.contains("HEALTHY"));
+    }
+
+    @Test
+    @DisplayName("CLI Integration: Test --version argument")
+    void testCliVersionArgument() {
+        HelloWorld.main(new String[]{"--version"});
+        String output = outContent.toString().trim();
+        assertTrue(output.contains(HelloWorld.APP_NAME));
+        assertTrue(output.contains(HelloWorld.APP_VERSION));
+    }
+
+    @Test
+    @DisplayName("CLI Integration: Test --greet argument with name")
+    void testCliGreetArgument() {
+        HelloWorld.main(new String[]{"--greet", "Jenkins"});
+        String output = outContent.toString().trim();
+        assertEquals("Hello Jenkins from Jenkins CI Pipeline!", output);
+    }
+
+    @Test
+    @DisplayName("CLI Integration: Test --help argument")
+    void testCliHelpArgument() {
+        HelloWorld.main(new String[]{"--help"});
+        String output = outContent.toString().trim();
+        assertTrue(output.contains("Usage:"));
+        assertTrue(output.contains("--smoke"));
+    }
+
+    @Test
+    @DisplayName("CLI Integration: Test default execution without arguments")
+    void testCliDefaultExecution() {
+        HelloWorld.main(new String[]{});
+        String output = outContent.toString().trim();
+        assertEquals("Hello from Jenkins CI Pipeline!", output);
+    }
+}
+```
+
+---
+
+### 4. `test/RegressionTest.java`
+```java
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+@Tag("regression")
+@DisplayName("Regression & Boundary Tests")
+public class RegressionTest {
+
+    @ParameterizedTest(name = "Test greeting for user: {0}")
+    @ValueSource(strings = {"Alice", "Bob", "DevOps-Lead", "CI_Bot_99", "12345"})
+    @DisplayName("Regression: Parameterized greeting test with varied input types")
+    void testParameterizedGreetings(String username) {
+        String greeting = HelloWorld.getCustomMessage(username);
+        assertTrue(greeting.contains(username));
+        assertTrue(greeting.endsWith("from Jenkins CI Pipeline!"));
+    }
+
+    @ParameterizedTest(name = "Total: {0}, Passed: {1} -> Expected: {2}%")
+    @CsvSource({
+        "100, 100, 100.0",
+        "100, 50, 50.0",
+        "4, 3, 75.0",
+        "3, 1, 33.333333333333336"
+    })
+    @DisplayName("Regression: Success rate calculations for varied datasets")
+    void testParameterizedSuccessRate(int total, int passed, double expected) {
+        assertEquals(expected, HelloWorld.calculateSuccessRate(total, passed), 0.0001);
+    }
+
+    @Test
+    @DisplayName("Boundary: Special Unicode characters handling")
+    void testSpecialCharactersGreeting() {
+        String specialInput = "⚡ DevSecOps 🚀";
+        String result = HelloWorld.getCustomMessage(specialInput);
+        assertEquals("Hello ⚡ DevSecOps 🚀 from Jenkins CI Pipeline!", result);
+    }
+}
+```
+
+---
+
+### 5. `Jenkinsfile`
+```groovy
+pipeline {
+    agent any
+
+    tools {
+        maven 'Maven-3.9'
+        jdk 'Java-11'
+    }
+
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        timestamps()
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Checking out source code from GitHub repository...'
+                checkout scm
+            }
+        }
+
+        stage('Compile') {
+            steps {
+                echo 'Compiling Java Source Code with Maven...'
+                sh 'mvn compile'
+            }
+        }
+
+        stage('Smoke Tests') {
+            steps {
+                echo '========================================='
+                echo ' RUNNING SMOKE TESTS (HEALTH & LATENCY)  '
+                echo '========================================='
+                sh 'mvn test -Dtest=SmokeTest'
+            }
+        }
+
+        stage('Unit Tests') {
+            steps {
+                echo '========================================='
+                echo '       RUNNING CORE UNIT TESTS           '
+                echo '========================================='
+                sh 'mvn test -Dtest=HelloWorldTest'
+            }
+        }
+
+        stage('Integration & CLI Tests') {
+            steps {
+                echo '========================================='
+                echo ' RUNNING INTEGRATION & CLI STREAM TESTS  '
+                echo '========================================='
+                sh 'mvn test -Dtest=IntegrationTest'
+            }
+        }
+
+        stage('Regression & Boundary Tests') {
+            steps {
+                echo '========================================='
+                echo ' RUNNING PARAMETERIZED REGRESSION TESTS  '
+                echo '========================================='
+                sh 'mvn test -Dtest=RegressionTest'
+            }
+            post {
+                always {
+                    junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
+                }
+            }
+        }
+
+        stage('Package & Build Artifact') {
+            steps {
+                echo 'Packaging application into executable JAR...'
+                sh 'mvn package -DskipTests'
+            }
+        }
+
+        stage('Runtime Verification') {
+            steps {
+                echo 'Verifying application runtime execution and CLI smoke check...'
+                sh 'java -jar target/jenkins-lab-1.0-SNAPSHOT.jar'
+                sh 'java -jar target/jenkins-lab-1.0-SNAPSHOT.jar --smoke'
+                sh 'java -jar target/jenkins-lab-1.0-SNAPSHOT.jar --version'
+                sh 'java -jar target/jenkins-lab-1.0-SNAPSHOT.jar --greet "Jenkins CI"'
+            }
+        }
+
+        stage('Archive Artifacts') {
+            steps {
+                echo 'Archiving build artifacts...'
+                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true, allowEmptyArchive: false
+            }
+        }
+    }
+
+    post {
+        success {
+            echo '==================================================='
+            echo '  ALL TEST SUITES (SMOKE, UNIT, INT, REG) PASSED!  '
+            echo '  JENKINS CI PIPELINE COMPLETED SUCCESSFULLY       '
+            echo '==================================================='
+        }
+        failure {
+            echo '==================================================='
+            echo '        JENKINS CI PIPELINE BUILD/TEST FAILED       '
+            echo '==================================================='
+        }
+    }
+}
 ```
 
 ---
@@ -216,7 +506,6 @@ mvn -version
 
 #### Step 3: Install and Start Jenkins
 ```bash
-# Add Jenkins repository key and source list
 curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | sudo tee \
   /usr/share/keyrings/jenkins-keyring.asc > /dev/null
 echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \
@@ -226,7 +515,6 @@ echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \
 sudo apt update
 sudo apt install jenkins -y
 
-# Start Jenkins daemon
 sudo systemctl start jenkins
 sudo systemctl enable jenkins
 sudo systemctl status jenkins
@@ -238,206 +526,103 @@ sudo systemctl status jenkins
    ```bash
    sudo cat /var/lib/jenkins/secrets/initialAdminPassword
    ```
-3. Click **"Install suggested plugins"** and create your Jenkins administrator account.
+3. Click **"Install suggested plugins"** and complete admin setup.
 
 ---
 
-### PART B – Create Sample Java Application & Maven Build Locally
+### PART B – Testing Commands
 
 ```bash
-# Test build locally
+# 1. Execute Smoke Tests only (Sanity check)
+mvn test -Dtest=SmokeTest
+
+# 2. Execute Unit Tests only
+mvn test -Dtest=HelloWorldTest
+
+# 3. Execute Integration Tests only
+mvn test -Dtest=IntegrationTest
+
+# 4. Execute Regression Tests only
+mvn test -Dtest=RegressionTest
+
+# 5. Execute Complete Test Suite (All 24 Tests)
 mvn clean test
+
+# 6. Build & Package Executable JAR
 mvn clean package
 
-# Run generated JAR
-java -jar target/jenkins-lab-1.0-SNAPSHOT.jar
+# 7. Test Executable JAR with Smoke Flags
+java -jar target/jenkins-lab-1.0-SNAPSHOT.jar --smoke
+java -jar target/jenkins-lab-1.0-SNAPSHOT.jar --greet "DevOps Team"
 ```
 
 ---
 
-### PART C – Push Code to GitHub
-
-```bash
-git init
-git add .
-git commit -m "feat: implement Jenkins and Maven CI project for Experiment 6"
-git branch -M main
-git remote add origin https://github.com/krishnarawatsf/devops-virtual-lab-experiment-6.git
-git push -u origin main
-```
-
----
-
-### PART D – Configure Jenkins Freestyle Job
-
-1. Open Jenkins Dashboard (`http://localhost:8080`).
-2. Click **New Item** ➡️ Enter Name `jenkins-maven-freestyle-lab` ➡️ Select **Freestyle project** ➡️ Click **OK**.
-3. **Source Code Management (SCM)**:
-   - Select **Git**.
-   - Repository URL: `https://github.com/krishnarawatsf/devops-virtual-lab-experiment-6.git`
-   - Branch Specifier: `*/main`
-4. **Build Triggers**:
-   - Check **GitHub hook trigger for GITScm polling** OR **Poll SCM** (`H/5 * * * *`).
-5. **Build Steps**:
-   - Click **Add build step** ➡️ Select **Invoke top-level Maven targets**.
-   - Maven Version: Select configured Maven.
-   - Goals: `clean test package`
-6. **Post-build Actions**:
-   - Select **Archive the artifacts** ➡️ Files to archive: `target/*.jar`
-   - Select **Publish JUnit test result report** ➡️ Test report XMLs: `target/surefire-reports/*.xml`
-7. Click **Save**.
-
----
-
-### PART E – Configure Jenkins Pipeline Job (Using Jenkinsfile)
-
-1. Open Jenkins Dashboard ➡️ Click **New Item**.
-2. Enter Name `jenkins-maven-pipeline-lab` ➡️ Select **Pipeline** ➡️ Click **OK**.
-3. Scroll down to **Pipeline Definition**:
-   - Definition: **Pipeline script from SCM**
-   - SCM: **Git**
-   - Repository URL: `https://github.com/krishnarawatsf/devops-virtual-lab-experiment-6.git`
-   - Branch Specifier: `*/main`
-   - Script Path: `Jenkinsfile`
-4. Click **Save**.
-
----
-
-### PART F – Execute Build & Verify Output
-
-1. Click **Build Now** on the left menu.
-2. Navigate to Build `#1` ➡️ Click **Console Output**.
-3. Verify expected execution output:
+## 🎯 Test Execution Logs (Console Output)
 
 ```text
-Started by user admin
-Obtained Jenkinsfile from git https://github.com/krishnarawatsf/devops-virtual-lab-experiment-6.git
-[Pipeline] Start of Pipeline
-[Pipeline] node
-Running on Jenkins in /var/lib/jenkins/workspace/jenkins-maven-pipeline-lab
-[Pipeline] {
-[Pipeline] stage (Checkout)
-[Pipeline] checkout
- > git clone https://github.com/krishnarawatsf/devops-virtual-lab-experiment-6.git
-[Pipeline] stage (Compile)
-[Pipeline] sh
-+ mvn compile
-[INFO] Scanning for projects...
-[INFO] Compiling 1 source file with javac to target/classes
-[INFO] BUILD SUCCESS
-[Pipeline] stage (Unit Testing)
-[Pipeline] sh
-+ mvn test
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running SmokeTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.025 s -- in SmokeTest
+[INFO] Running RegressionTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.036 s -- in RegressionTest
 [INFO] Running HelloWorldTest
 Hello from Jenkins CI Pipeline!
-[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in HelloWorldTest
+[INFO] Running IntegrationTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in IntegrationTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 24, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
-[Pipeline] stage (Package & Build Artifact)
-[Pipeline] sh
-+ mvn clean package
-[INFO] Building jar: target/jenkins-lab-1.0-SNAPSHOT.jar
-[INFO] BUILD SUCCESS
-[Pipeline] stage (Execute & Verify)
-[Pipeline] sh
-+ java -jar target/jenkins-lab-1.0-SNAPSHOT.jar
-Hello from Jenkins CI Pipeline!
-[Pipeline] stage (Archive Artifacts)
-[Pipeline] archiveArtifacts
-Archiving artifacts: target/jenkins-lab-1.0-SNAPSHOT.jar
-[Pipeline] }
-[Pipeline] // End of Pipeline
-===================================================
-  JENKINS CI PIPELINE COMPLETED SUCCESSFULLY (PASSED) 
-===================================================
-Finished: SUCCESS
+[INFO] ------------------------------------------------------------------------
 ```
 
 ---
 
-## 🎯 Observations
-1. **Automated SCM Integration**: Jenkins accurately detected changes pushed to the GitHub repository and pulled the source code.
-2. **Automated Lifecycle Management**: Maven resolved dependencies, compiled code, executed JUnit tests, and packaged the binary without manual intervention.
-3. **Artifact Retention**: The generated JAR artifact was cleanly built and archived on Jenkins.
-4. **Early Bug Detection**: Automated testing ensured code correctness before artifact generation.
-
----
-
-## 🏆 Result
-The Continuous Integration (CI) pipeline was successfully implemented using **Jenkins** and **Apache Maven**. The pipeline continuously builds, tests, and packages the Java application whenever updates are pushed to the GitHub repository.
-
----
-
-## 📚 Viva Voce Questions & Answers
+## 📚 Viva Voce Questions & Answers (Testing & CI Focus)
 
 ### 🟢 Basic Level
 
-#### Q1: What is Jenkins?
-> **Answer:** Jenkins is an open-source automation server written in Java. It enables developers to reliably build, test, and deploy their software continuously (CI/CD) through automated pipelines and hundreds of community plugins.
+#### Q1: What is a Smoke Test?
+> **Answer:** A Smoke Test (also known as Build Verification Testing or Sanity Check) is a quick, initial test performed on a new build to ensure that critical features work and the application is stable enough for deeper testing. If a smoke test fails, the build is immediately rejected.
 
-#### Q2: What is Continuous Integration (CI)?
-> **Answer:** Continuous Integration (CI) is a DevOps software development practice where developers merge their code changes into a central repository frequently. Each integration is verified by an automated build and test suite to detect integration bugs early.
+#### Q2: What is a Unit Test?
+> **Answer:** A Unit Test is an automated test that validates individual units or components of software (e.g., functions, methods, classes) in isolation from external dependencies.
 
-#### Q3: What is Apache Maven?
-> **Answer:** Apache Maven is a project management and comprehension tool based on the concept of a Project Object Model (POM). Maven manages project builds, reporting, dependency resolution, and documentation from a central piece of information.
-
-#### Q4: What is a Build Tool?
-> **Answer:** A build tool is a program that automates the creation of executable applications from source code. It handles tasks such as compiling code, linking libraries, running automated tests, downloading dependencies, and packaging binaries into formats like JAR, WAR, or ZIP.
-
-#### Q5: What is `pom.xml`?
-> **Answer:** `pom.xml` (Project Object Model XML) is the fundamental unit of configuration in Maven. It contains project configuration information, dependencies, plugins, build profiles, and metadata required by Maven to build the project.
+#### Q3: What is Continuous Integration (CI)?
+> **Answer:** CI is the DevOps practice where developers frequently commit code to a shared repository, triggering automated builds, smoke tests, and regression test suites to detect defects early.
 
 ---
 
 ### 🟡 Intermediate Level
 
-#### Q6: What is the difference between Continuous Integration (CI) and Continuous Deployment (CD)?
-> **Answer:** 
-> - **Continuous Integration (CI)** focuses on automatically building and testing code every time a commit is pushed to find integration issues early.
-> - **Continuous Delivery (CD)** ensures validated code changes are automatically prepared and staged for release to production.
-> - **Continuous Deployment (CD)** automatically releases validated builds directly to end-user production environments without manual approval.
-
-#### Q7: What are Jenkins Plugins?
-> **Answer:** Jenkins plugins are modular extensions that enhance Jenkins functionality. They allow Jenkins to integrate with various tools and platforms, such as Git, GitHub, Maven, Docker, Kubernetes, Slack, and AWS.
-
-#### Q8: What is a Jenkins Pipeline?
-> **Answer:** A Jenkins Pipeline is a suite of plugins supporting the implementation and integration of continuous delivery pipelines into Jenkins. It defines the entire build/test/deploy lifecycle through code (`Jenkinsfile`) as Declarative or Scripted pipelines ("Pipeline as Code").
-
-#### Q9: What is a Workspace in Jenkins?
-> **Answer:** A workspace is a designated directory on the Jenkins server (or build agent) file system where Jenkins checks out source code from SCM and runs build/test scripts for a specific job.
-
-#### Q10: What is the difference between a Freestyle Project and a Pipeline Project in Jenkins?
+#### Q4: What is the difference between Smoke Testing, Sanity Testing, and Regression Testing?
 > **Answer:**
-> - **Freestyle Project**: Configured via the Jenkins GUI form fields. It is simple to set up for basic tasks but lacks version control, complex branching logic, and portability.
-> - **Pipeline Project**: Written as code (`Jenkinsfile`) stored directly in the Git repository. It supports complex workflows, stage visualization, error handling, parallel execution, and versioning alongside application code.
+> - **Smoke Testing**: Wide and shallow test suite verifying that critical basic functions work (e.g., app starts, memory healthy, responds in <50ms). Done on every new build.
+> - **Sanity Testing**: Narrow and deep test suite verifying specific bug fixes or features without testing the entire application.
+> - **Regression Testing**: Comprehensive test suite ensuring that recent code changes have not broken existing, working features.
+
+#### Q5: What is Integration Testing in a CI Pipeline?
+> **Answer:** Integration testing verifies that individual modules, services, external interfaces (like CLI arguments, databases, APIs) work together as expected.
+
+#### Q6: What is Parameterized Testing in JUnit 5?
+> **Answer:** Parameterized testing allows a single test method to run multiple times with different arguments using annotations like `@ValueSource`, `@CsvSource`, or `@MethodSource`.
 
 ---
 
 ### 🔴 Advanced Level
 
-#### Q11: How does Jenkins trigger builds automatically upon Git push?
-> **Answer:** Jenkins can trigger builds automatically via:
-> 1. **Webhooks (Push-based - Recommended)**: GitHub sends an HTTP POST payload to the Jenkins endpoint (`http://<jenkins-url>/github-webhook/`) instantly when a commit is pushed.
-> 2. **Polling SCM (Pull-based)**: Jenkins periodically queries the Git repository on a cron schedule (e.g., `H/5 * * * *`) to check if new commits exist.
-> 3. **Generic Webhook Trigger Plugin**: Triggers builds based on custom HTTP API requests.
+#### Q7: Why are Smoke Tests executed before Unit and Regression Tests in a CI/CD Pipeline?
+> **Answer:** "Fail-Fast Principle": Smoke tests take milliseconds to execute. If the core JVM runtime or critical configuration is broken, running long unit or integration suites wastes compute resources and time. Smoke tests fail the pipeline instantly.
 
-#### Q12: What is a Webhook in Jenkins and how does it work?
-> **Answer:** A Webhook is an HTTP callback triggered by an event in an external service (like GitHub). When a developer pushes code, GitHub makes a POST request to Jenkins. Jenkins intercepts the payload, matches the repository and branch, and initiates the corresponding pipeline immediately with zero polling delay.
-
-#### Q13: How does Maven manage dependencies and resolve transitive dependencies?
-> **Answer:** Maven manages dependencies through its coordinate system (`groupId`, `artifactId`, `version`). When building, Maven searches the local repository (`~/.m2/repository`), then configured mirrors or Maven Central. Maven uses dependency mediation (nearest-definition wins) to resolve transitive dependencies and allows exclusions or version enforcement via `<dependencyManagement>`.
-
-#### Q14: What is Artifact Generation in Maven and where are artifacts stored?
-> **Answer:** Artifact generation is the packaging phase (`mvn package`) where compiled classes and resources are bundled into a distributable archive (e.g., `.jar`, `.war`). Artifacts are stored locally in the `target/` folder, cached in the local repository (`~/.m2`), or deployed to remote binary managers (Nexus, Artifactory, AWS CodeArtifact) using `mvn deploy`.
-
-#### Q15: Explain the key stages of a standard Jenkins CI/CD Pipeline.
-> **Answer:**
-> 1. **Checkout / SCM**: Pulls latest source code and tags from Git.
-> 2. **Build / Compile**: Invokes compiler (`mvn compile`) to validate syntax and produce bytecode.
-> 3. **Unit Test**: Runs unit tests (`mvn test`) and publishes test reports (Surefire/JUnit).
-> 4. **Static Code Analysis**: Runs linters / SonarQube for security and code quality gates.
-> 5. **Package**: Generates distributable binaries (`mvn package`).
-> 6. **Archive / Publish**: Uploads artifacts to binary repositories or Jenkins storage.
-> 7. **Deploy**: Deploys artifact to staging/production environments (CD).
+#### Q8: How does Jenkins handle test reports from Maven?
+> **Answer:** Maven's `maven-surefire-plugin` generates standard XML test report files in `target/surefire-reports/*.xml`. Jenkins reads these reports using the `junit` post-action step (`junit 'target/surefire-reports/*.xml'`) and plots visual test result trends, failure breakdowns, and pass/fail metrics on the project dashboard.
 
 ---
 
