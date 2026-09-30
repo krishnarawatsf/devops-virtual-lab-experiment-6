@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jenkins CI & Maven Dashboard | Virtual Lab Experiment 6</title>
+  <meta name="description" content="Live Continuous Integration and Testing Dashboard for Jenkins & Apache Maven Java Virtual Lab Experiment 6.">
+  
+  <!-- FontAwesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- Header Navigation -->
+    <header class="header">
+      <div class="brand-section">
+        <div class="logo-icon">
+          <i class="fa-brands fa-jenkins"></i>
+        </div>
+        <div class="brand-info">
+          <h1>Jenkins &amp; Maven CI/CD Intelligence Hub</h1>
+          <p>Virtual Lab Experiment 6 &bull; Automated Build, Smoke &amp; Multi-Tier Testing</p>
+        </div>
+      </div>
+
+      <div class="header-badges">
+        <div class="badge badge-success">
+          <span class="badge-pulse-dot"></span>
+          <span>CI Pipeline: HEALTHY</span>
+        </div>
+        <div class="badge badge-cyan">
+          <i class="fa-solid fa-clock"></i>
+          <span id="live-time">16:45:00 UTC</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button class="btn btn-primary" id="btn-trigger-pipeline">
+          <i class="fa-solid fa-play"></i> Trigger Pipeline
+        </button>
+        <a href="https://github.com/krishnarawatsf/devops-virtual-lab-experiment-6" target="_blank" class="btn btn-secondary">
+          <i class="fa-brands fa-github"></i> GitHub Repo
+        </a>
+      </div>
+    </header>
+
+    <!-- Top KPI Grid -->
+    <section class="kpi-grid">
+      <!-- Card 1 -->
+      <div class="kpi-card green">
+        <div class="kpi-header">
+          <span class="kpi-title">Build Status</span>
+          <i class="fa-solid fa-circle-check kpi-icon text-green"></i>
+        </div>
+        <div class="kpi-value text-green">SUCCESS</div>
+        <div class="kpi-sub"><i class="fa-solid fa-cube"></i> Maven 3.9 &bull; JDK 11+</div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="kpi-card cyan">
+        <div class="kpi-header">
+          <span class="kpi-title">Test Suite</span>
+          <i class="fa-solid fa-flask-vial kpi-icon text-cyan"></i>
+        </div>
+        <div class="kpi-value text-cyan">24 / 24</div>
+        <div class="kpi-sub"><i class="fa-solid fa-shield-halved"></i> 100% Pass Rate (0 Failures)</div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="kpi-card purple">
+        <div class="kpi-header">
+          <span class="kpi-title">Smoke Latency</span>
+          <i class="fa-solid fa-fire-flame-curved kpi-icon text-purple"></i>
+        </div>
+        <div class="kpi-value text-purple">&lt; 1 ms</div>
+        <div class="kpi-sub"><i class="fa-solid fa-bolt"></i> Boundary Limit: 50ms</div>
+      </div>
+
+      <!-- Card 4 -->
+      <div class="kpi-card yellow">
+        <div class="kpi-header">
+          <span class="kpi-title">Artifact Output</span>
+          <i class="fa-solid fa-box-archive kpi-icon text-yellow"></i>
+        </div>
+        <div class="kpi-value text-yellow">3.6 KB</div>
+        <div class="kpi-sub"><i class="fa-solid fa-file-code"></i> jenkins-lab-1.0-SNAPSHOT.jar</div>
+      </div>
+    </section>
+
+    <!-- Main Visualizer: Pipeline Flow Track -->
+    <section class="glass-panel" style="margin-bottom: 28px;">
+      <div class="panel-title-bar">
+        <div class="panel-title">
+          <i class="fa-solid fa-diagram-project"></i>
+          <span>Live Declarative CI/CD Pipeline Stages</span>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <span class="badge badge-cyan"><i class="fa-solid fa-code-branch"></i> branch: main</span>
+          <span class="badge badge-success"><i class="fa-solid fa-microchip"></i> Executor: Built-in</span>
+        </div>
+      </div>
+
+      <div class="pipeline-track" id="pipeline-track">
+        <!-- Stage 1 -->
+        <div class="pipeline-stage success" data-stage="checkout">
+          <div class="stage-status-icon"><i class="fa-solid fa-check"></i></div>
+          <div class="stage-name">1. Checkout SCM</div>
+          <div class="stage-time">0.12s &bull; Git</div>
+        </div>
+
+        <div class="stage-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+
+        <!-- Stage 2 -->
+        <div class="pipeline-stage success" data-stage="compile">
+          <div class="stage-status-icon"><i class="fa-solid fa-check"></i></div>
+          <div class="stage-name">2. Compile</div>
+          <div class="stage-time">0.28s &bull; javac 11</div>
+        </div>
+
+        <div class="stage-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+
+        <!-- Stage 3 -->
+        <div class="pipeline-stage success" data-stage="smoke">
+          <div class="stage-status-icon"><i class="fa-solid fa-check"></i></div>
+          <div class="stage-name">3. Smoke Tests</div>
+          <div class="stage-time">0.025s &bull; 4 Tests</div>
+        </div>
+
+        <div class="stage-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+
+        <!-- Stage 4 -->
+        <div class="pipeline-stage success" data-stage="unit">
+          <div class="stage-status-icon"><i class="fa-solid fa-check"></i></div>
+          <div class="stage-name">4. Unit Tests</div>
+          <div class="stage-time">0.004s &bull; 5 Tests</div>
+        </div>
+
+        <div class="stage-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+
+        <!-- Stage 5 -->
+        <div class="pipeline-stage success" data-stage="int">
+          <div class="stage-status-icon"><i class="fa-solid fa-check"></i></div>
+          <div class="stage-name">5. Integration</div>
+          <div class="stage-time">0.005s &bull; 5 Tests</div>
+        </div>
+
+        <div class="stage-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+
+        <!-- Stage 6 -->
+        <div class="pipeline-stage success" data-stage="reg">
+          <div class="stage-status-icon"><i class="fa-solid fa-check"></i></div>
+          <div class="stage-name">6. Regression</div>
+          <div class="stage-time">0.035s &bull; 10 Tests</div>
+        </div>
+
+        <div class="stage-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+
+        <!-- Stage 7 -->
+        <div class="pipeline-stage success" data-stage="package">
+          <div class="stage-status-icon"><i class="fa-solid fa-check"></i></div>
+          <div class="stage-name">7. Package JAR</div>
+          <div class="stage-time">0.18s &bull; Archive</div>
+        </div>
+
+        <div class="stage-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+
+        <!-- Stage 8 -->
+        <div class="pipeline-stage success" data-stage="verify">
+          <div class="stage-status-icon"><i class="fa-solid fa-check"></i></div>
+          <div class="stage-name">8. Runtime Check</div>
+          <div class="stage-time">0.04s &bull; Verified</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Two Column Grid: Terminal Console & Test Explorer -->
+    <section class="two-col-grid">
+      
+      <!-- Column 1: Live Interactive Terminal Console -->
+      <div class="glass-panel">
+        <div class="panel-title-bar">
+          <div class="panel-title">
+            <i class="fa-solid fa-terminal"></i>
+            <span>Interactive Terminal &amp; Build Logs</span>
+          </div>
+          <div class="terminal-tabs">
+            <button class="term-tab active" data-tab="full">Build Log</button>
+            <button class="term-tab" data-tab="smoke">Smoke Test</button>
+            <button class="term-tab" data-tab="surefire">Surefire XML</button>
+            <button class="term-tab" data-tab="runtime">Runtime</button>
+          </div>
+        </div>
+
+        <div class="terminal-window">
+          <div class="terminal-header">
+            <div class="terminal-controls">
+              <span class="term-dot red"></span>
+              <span class="term-dot yellow"></span>
+              <span class="term-dot green"></span>
+            </div>
+            <div class="terminal-title">bash - jenkins@devops-node: /workspace/jenkins-lab</div>
+            <div style="font-size:11px; color:var(--accent-cyan); font-family:var(--font-mono);">UTF-8</div>
+          </div>
+          <div class="terminal-body" id="terminal-content">
+            <!-- Populated dynamically via JS -->
+          </div>
+          <div class="terminal-input-bar">
+            <span class="term-prompt-symbol">$</span>
+            <input type="text" class="term-input" id="term-cmd-input" placeholder="Type command (e.g. mvn test, --smoke, --greet 'Alex') and hit Enter...">
+          </div>
+        </div>
+
+        <!-- Quick Command Buttons -->
+        <div class="quick-commands">
+          <span style="font-size:11px; color:var(--text-dim); align-self:center;">Quick Run:</span>
+          <button class="cmd-pill" data-cmd="mvn test -Dtest=SmokeTest">mvn test -Dtest=SmokeTest</button>
+          <button class="cmd-pill" data-cmd="mvn test">mvn test (All 24 Tests)</button>
+          <button class="cmd-pill" data-cmd="java -jar target/jenkins-lab.jar --smoke">java -jar app.jar --smoke</button>
+          <button class="cmd-pill" data-cmd="java -jar target/jenkins-lab.jar --greet 'Krishna'">java -jar app.jar --greet "Krishna"</button>
+          <button class="cmd-pill" data-cmd="mvn clean package">mvn clean package</button>
+        </div>
+      </div>
+
+      <!-- Column 2: Test Explorer -->
+      <div class="glass-panel">
+        <div class="panel-title-bar">
+          <div class="panel-title">
+            <i class="fa-solid fa-list-check"></i>
+            <span>Test Explorer (24 Tests)</span>
+          </div>
+        </div>
+
+        <div class="test-filter-bar">
+          <div class="filter-pills">
+            <button class="filter-btn active" data-filter="all">All (24)</button>
+            <button class="filter-btn" data-filter="smoke">Smoke (4)</button>
+            <button class="filter-btn" data-filter="unit">Unit (5)</button>
+            <button class="filter-btn" data-filter="integration">Integration (5)</button>
+            <button class="filter-btn" data-filter="regression">Regression (10)</button>
+          </div>
+          <div class="search-input-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="test-search" placeholder="Search test cases...">
+          </div>
+        </div>
+
+        <div class="test-list-container" id="test-list">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Viva Voce Flashcard Knowledge Center -->
+    <section class="glass-panel">
+      <div class="panel-title-bar">
+        <div class="panel-title">
+          <i class="fa-solid fa-graduation-cap"></i>
+          <span>Viva Voce &amp; Examination Mastery Deck (VLE-6)</span>
+        </div>
+        <div class="badge badge-purple">
+          <i class="fa-solid fa-brain"></i> Interactive Q&amp;A
+        </div>
+      </div>
+
+      <div class="flashcard-deck">
+        <!-- Card 1 -->
+        <div class="viva-card">
+          <div class="viva-card-top">
+            <span class="viva-difficulty diff-basic">Basic</span>
+            <i class="fa-solid fa-circle-question text-cyan"></i>
+          </div>
+          <div class="viva-q">What is Continuous Integration (CI)?</div>
+          <div class="viva-a">CI is the software practice where developers integrate code into a shared repository multiple times daily, automatically validated by builds and automated tests to detect bugs early.</div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="viva-card">
+          <div class="viva-card-top">
+            <span class="viva-difficulty diff-basic">Basic</span>
+            <i class="fa-solid fa-circle-question text-cyan"></i>
+          </div>
+          <div class="viva-q">What is Apache Maven &amp; pom.xml?</div>
+          <div class="viva-a">Maven is a build automation and dependency manager. The <code>pom.xml</code> (Project Object Model) defines build configs, plugins, source directories, and dependency coordinates.</div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="viva-card">
+          <div class="viva-card-top">
+            <span class="viva-difficulty diff-inter">Intermediate</span>
+            <i class="fa-solid fa-circle-question text-yellow"></i>
+          </div>
+          <div class="viva-q">Smoke Testing vs Regression Testing?</div>
+          <div class="viva-a"><strong>Smoke Testing:</strong> Wide &amp; shallow sanity check verifying critical runtime/memory stability (<50ms).<br><strong>Regression Testing:</strong> Comprehensive parameterized tests verifying new code didn't break existing features.</div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="viva-card">
+          <div class="viva-card-top">
+            <span class="viva-difficulty diff-inter">Intermediate</span>
+            <i class="fa-solid fa-circle-question text-yellow"></i>
+          </div>
+          <div class="viva-q">Freestyle Project vs Pipeline as Code?</div>
+          <div class="viva-a">Freestyle jobs are configured manually via the web UI. Pipelines are codified in version-controlled <code>Jenkinsfile</code> scripts, supporting stages, error handling, and multi-branch automation.</div>
+        </div>
+
+        <!-- Card 5 -->
+        <div class="viva-card">
+          <div class="viva-card-top">
+            <span class="viva-difficulty diff-adv">Advanced</span>
+            <i class="fa-solid fa-circle-question text-red"></i>
+          </div>
+          <div class="viva-q">How do Webhooks trigger Jenkins builds?</div>
+          <div class="viva-a">GitHub sends an HTTP POST payload to <code>/github-webhook/</code> instantly when commits are pushed. Jenkins intercepts this payload and triggers the corresponding pipeline with zero delay.</div>
+        </div>
+
+        <!-- Card 6 -->
+        <div class="viva-card">
+          <div class="viva-card-top">
+            <span class="viva-difficulty diff-adv">Advanced</span>
+            <i class="fa-solid fa-circle-question text-red"></i>
+          </div>
+          <div class="viva-q">How does Maven resolve Transitive Dependencies?</div>
+          <div class="viva-a">Maven uses dependency mediation ("nearest-definition" in POM hierarchy) and caches libraries in <code>~/.m2/repository</code> to eliminate redundant network downloads.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>Virtual Lab Experiment 6: Jenkins with Build Tool (Maven) &bull; Designed by <a href="https://github.com/krishnarawatsf" target="_blank">Krishna Rawat</a></p>
+      <p style="margin-top:6px; color:var(--text-dim);">Cloud Computing &amp; DevOps Engineering &bull; Fully Automated CI/CD Lifecycle</p>
+    </footer>
+
+  </div>
+
+  <!-- App Script -->
+  <script src="js/app.js"></script>
+</body>
+</html>
