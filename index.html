@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jenkins CI & Maven Dashboard | Virtual Lab Experiment 6</title>
+  <title>Jenkins CI &amp; Maven Dashboard | Virtual Lab Experiment 6</title>
   <meta name="description" content="Live Continuous Integration and Testing Dashboard for Jenkins & Apache Maven Java Virtual Lab Experiment 6.">
   
   <!-- FontAwesome 6 -->
@@ -35,7 +35,7 @@
         </div>
         <div class="badge badge-cyan">
           <i class="fa-solid fa-clock"></i>
-          <span id="live-time">16:45:00 UTC</span>
+          <span id="live-time">16:53:00 UTC</span>
         </div>
       </div>
 
@@ -97,7 +97,7 @@
       <div class="panel-title-bar">
         <div class="panel-title">
           <i class="fa-solid fa-diagram-project"></i>
-          <span>Live Declarative CI/CD Pipeline Stages</span>
+          <span>Live Declarative CI/CD Pipeline Stages (Click stage to inspect logs)</span>
         </div>
         <div style="display:flex; gap:10px;">
           <span class="badge badge-cyan"><i class="fa-solid fa-code-branch"></i> branch: main</span>
@@ -107,7 +107,7 @@
 
       <div class="pipeline-track" id="pipeline-track">
         <!-- Stage 1 -->
-        <div class="pipeline-stage success" data-stage="checkout">
+        <div class="pipeline-stage success" data-stage="checkout" title="Click to view Checkout logs">
           <div class="stage-status-icon"><i class="fa-solid fa-check"></i></div>
           <div class="stage-name">1. Checkout SCM</div>
           <div class="stage-time">0.12s &bull; Git</div>
@@ -116,7 +116,7 @@
         <div class="stage-arrow"><i class="fa-solid fa-chevron-right"></i></div>
 
         <!-- Stage 2 -->
-        <div class="pipeline-stage success" data-stage="compile">
+        <div class="pipeline-stage success" data-stage="compile" title="Click to view Compile logs">
           <div class="stage-status-icon"><i class="fa-solid fa-check"></i></div>
           <div class="stage-name">2. Compile</div>
           <div class="stage-time">0.28s &bull; javac 11</div>
@@ -125,7 +125,7 @@
         <div class="stage-arrow"><i class="fa-solid fa-chevron-right"></i></div>
 
         <!-- Stage 3 -->
-        <div class="pipeline-stage success" data-stage="smoke">
+        <div class="pipeline-stage success" data-stage="smoke" title="Click to view Smoke Test logs">
           <div class="stage-status-icon"><i class="fa-solid fa-check"></i></div>
           <div class="stage-name">3. Smoke Tests</div>
           <div class="stage-time">0.025s &bull; 4 Tests</div>
@@ -134,7 +134,7 @@
         <div class="stage-arrow"><i class="fa-solid fa-chevron-right"></i></div>
 
         <!-- Stage 4 -->
-        <div class="pipeline-stage success" data-stage="unit">
+        <div class="pipeline-stage success" data-stage="unit" title="Click to view Unit Test logs">
           <div class="stage-status-icon"><i class="fa-solid fa-check"></i></div>
           <div class="stage-name">4. Unit Tests</div>
           <div class="stage-time">0.004s &bull; 5 Tests</div>
@@ -143,7 +143,7 @@
         <div class="stage-arrow"><i class="fa-solid fa-chevron-right"></i></div>
 
         <!-- Stage 5 -->
-        <div class="pipeline-stage success" data-stage="int">
+        <div class="pipeline-stage success" data-stage="int" title="Click to view Integration logs">
           <div class="stage-status-icon"><i class="fa-solid fa-check"></i></div>
           <div class="stage-name">5. Integration</div>
           <div class="stage-time">0.005s &bull; 5 Tests</div>
@@ -152,7 +152,7 @@
         <div class="stage-arrow"><i class="fa-solid fa-chevron-right"></i></div>
 
         <!-- Stage 6 -->
-        <div class="pipeline-stage success" data-stage="reg">
+        <div class="pipeline-stage success" data-stage="reg" title="Click to view Regression logs">
           <div class="stage-status-icon"><i class="fa-solid fa-check"></i></div>
           <div class="stage-name">6. Regression</div>
           <div class="stage-time">0.035s &bull; 10 Tests</div>
@@ -161,7 +161,7 @@
         <div class="stage-arrow"><i class="fa-solid fa-chevron-right"></i></div>
 
         <!-- Stage 7 -->
-        <div class="pipeline-stage success" data-stage="package">
+        <div class="pipeline-stage success" data-stage="package" title="Click to view Package logs">
           <div class="stage-status-icon"><i class="fa-solid fa-check"></i></div>
           <div class="stage-name">7. Package JAR</div>
           <div class="stage-time">0.18s &bull; Archive</div>
@@ -170,7 +170,7 @@
         <div class="stage-arrow"><i class="fa-solid fa-chevron-right"></i></div>
 
         <!-- Stage 8 -->
-        <div class="pipeline-stage success" data-stage="verify">
+        <div class="pipeline-stage success" data-stage="verify" title="Click to view Runtime logs">
           <div class="stage-status-icon"><i class="fa-solid fa-check"></i></div>
           <div class="stage-name">8. Runtime Check</div>
           <div class="stage-time">0.04s &bull; Verified</div>
@@ -199,9 +199,9 @@
         <div class="terminal-window">
           <div class="terminal-header">
             <div class="terminal-controls">
-              <span class="term-dot red"></span>
-              <span class="term-dot yellow"></span>
-              <span class="term-dot green"></span>
+              <span class="term-dot red" title="Clear Terminal"></span>
+              <span class="term-dot yellow" title="Reset Logs"></span>
+              <span class="term-dot green" title="Run Pipeline"></span>
             </div>
             <div class="terminal-title">bash - jenkins@devops-node: /workspace/jenkins-lab</div>
             <div style="font-size:11px; color:var(--accent-cyan); font-family:var(--font-mono);">UTF-8</div>
@@ -231,7 +231,7 @@
         <div class="panel-title-bar">
           <div class="panel-title">
             <i class="fa-solid fa-list-check"></i>
-            <span>Test Explorer (24 Tests)</span>
+            <span>Test Explorer (24 Tests &bull; Click to run test)</span>
           </div>
         </div>
 
@@ -261,7 +261,7 @@
       <div class="panel-title-bar">
         <div class="panel-title">
           <i class="fa-solid fa-graduation-cap"></i>
-          <span>Viva Voce &amp; Examination Mastery Deck (VLE-6)</span>
+          <span>Viva Voce &amp; Examination Mastery Deck (Click card to reveal/hide answer)</span>
         </div>
         <div class="badge badge-purple">
           <i class="fa-solid fa-brain"></i> Interactive Q&amp;A
@@ -276,6 +276,7 @@
             <i class="fa-solid fa-circle-question text-cyan"></i>
           </div>
           <div class="viva-q">What is Continuous Integration (CI)?</div>
+          <div class="viva-toggle-hint"><i class="fa-solid fa-eye"></i> <span>Click to hide answer</span></div>
           <div class="viva-a">CI is the software practice where developers integrate code into a shared repository multiple times daily, automatically validated by builds and automated tests to detect bugs early.</div>
         </div>
 
@@ -286,6 +287,7 @@
             <i class="fa-solid fa-circle-question text-cyan"></i>
           </div>
           <div class="viva-q">What is Apache Maven &amp; pom.xml?</div>
+          <div class="viva-toggle-hint"><i class="fa-solid fa-eye"></i> <span>Click to hide answer</span></div>
           <div class="viva-a">Maven is a build automation and dependency manager. The <code>pom.xml</code> (Project Object Model) defines build configs, plugins, source directories, and dependency coordinates.</div>
         </div>
 
@@ -296,7 +298,8 @@
             <i class="fa-solid fa-circle-question text-yellow"></i>
           </div>
           <div class="viva-q">Smoke Testing vs Regression Testing?</div>
-          <div class="viva-a"><strong>Smoke Testing:</strong> Wide &amp; shallow sanity check verifying critical runtime/memory stability (<50ms).<br><strong>Regression Testing:</strong> Comprehensive parameterized tests verifying new code didn't break existing features.</div>
+          <div class="viva-toggle-hint"><i class="fa-solid fa-eye"></i> <span>Click to hide answer</span></div>
+          <div class="viva-a"><strong>Smoke Testing:</strong> Wide &amp; shallow sanity check verifying critical runtime/memory stability (&lt;50ms).<br><strong>Regression Testing:</strong> Comprehensive parameterized tests verifying new code didn't break existing features.</div>
         </div>
 
         <!-- Card 4 -->
@@ -306,6 +309,7 @@
             <i class="fa-solid fa-circle-question text-yellow"></i>
           </div>
           <div class="viva-q">Freestyle Project vs Pipeline as Code?</div>
+          <div class="viva-toggle-hint"><i class="fa-solid fa-eye"></i> <span>Click to hide answer</span></div>
           <div class="viva-a">Freestyle jobs are configured manually via the web UI. Pipelines are codified in version-controlled <code>Jenkinsfile</code> scripts, supporting stages, error handling, and multi-branch automation.</div>
         </div>
 
@@ -316,6 +320,7 @@
             <i class="fa-solid fa-circle-question text-red"></i>
           </div>
           <div class="viva-q">How do Webhooks trigger Jenkins builds?</div>
+          <div class="viva-toggle-hint"><i class="fa-solid fa-eye"></i> <span>Click to hide answer</span></div>
           <div class="viva-a">GitHub sends an HTTP POST payload to <code>/github-webhook/</code> instantly when commits are pushed. Jenkins intercepts this payload and triggers the corresponding pipeline with zero delay.</div>
         </div>
 
@@ -326,6 +331,7 @@
             <i class="fa-solid fa-circle-question text-red"></i>
           </div>
           <div class="viva-q">How does Maven resolve Transitive Dependencies?</div>
+          <div class="viva-toggle-hint"><i class="fa-solid fa-eye"></i> <span>Click to hide answer</span></div>
           <div class="viva-a">Maven uses dependency mediation ("nearest-definition" in POM hierarchy) and caches libraries in <code>~/.m2/repository</code> to eliminate redundant network downloads.</div>
         </div>
       </div>
